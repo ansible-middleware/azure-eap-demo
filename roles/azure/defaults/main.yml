@@ -1,0 +1,45 @@
+---
+#Resource Group info
+resource_groups:
+  - name: eap-cluster
+    location: eastus
+    address_prefixes: "10.0.0.0/24"
+virtualnetwork_name: eap-cluster-vnet
+subnet_name: eap-cluster-private-snet
+securitygroup_name: eap-cluster-sg
+admin_username: rheluser 
+admin_password: Password12345
+offer: RHEL
+publisher: RedHat
+sku: 8-LVM
+image_version: "latest"
+vm_size: "Standard_D2s_v3"
+publicIP: ansible-middileware-ip
+public_ip_address_name: ansible-middileware-public-ip
+domain_name: "rhsso"
+privatednszone: "internal.ansiblemiddleware.com"
+vn_peering_name: "eastus-centralus-peering"
+allow_virtual_network_access: true
+allow_forwarded_traffic: true
+#security groups
+security:
+  groups:
+    eap:
+      rules:
+        - name: 'ssh'
+          destination_port_range: '22'
+          priority: 101
+          protocol: Tcp
+          direction: Inbound
+        - name: https
+          destination_port_range: '443'
+          priority: 102
+          protocol: Tcp
+          direction: Inbound
+vm:
+  - name: 'site1-eap1'
+    site: 'site1'
+    role: 'eap'
+    resourcegroup_name: ansible-middileware-eastus-rg
+    resourcegroup_location: eastus
+    domain_name: 'eap'

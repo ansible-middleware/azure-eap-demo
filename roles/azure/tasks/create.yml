@@ -1,0 +1,75 @@
+---
+- name: Create resource group
+  azure_rm_resourcegroup:
+    name: "{{ item.name }}"
+    location: "{{ item.location }}"
+  loop: "{{ resource_groups }}"
+
+- name: Create virtual network
+  azure_rm_virtualnetwork:
+    resource_group: "{{ item.name }}"
+    name: "{{ virtualnetwork_name }}"
+    address_prefixes: "{{ item.address_prefixes }}"
+  loop: "{{ resource_groups }}"
+
+- name: Add subnet
+  azure_rm_subnet:
+    resource_group: "{{ item.name }}"
+    name: "{{ subnet_name }}"
+    virtual_network: "{{ virtualnetwork_name }}"
+    address_prefix: "{{ item.address_prefixes }}"
+  loop: "{{ resource_groups }}"
+
+- name: Create security groups
+  azure_rm_securitygroup:
+    resource_group: "{{ resource_groups.0.name }}"
+    name: "{{ sg.key }}"
+    rules: "{{ sg.value.rules }}"
+  loop: "{{ security.groups | dict2items }}"
+  loop_control:
+    loop_var: sg
+
+- name: Create a private DNS zone
+  azure.azcollection.azure_rm_privatednszone:
+    resource_group: "{{ item.name }}"
+    name: "{{ privatednszone }}"
+  loop: "{{ resource_groups }}"
+
+- name: Create public IP address for VM's
+  azure_rm_publicipaddress:
+    resource_group: "{{ item.resourcegroup_name }}"
+    allocation_method: Static
+    name: "{{ item.name }}-ip"
+    domain_name: "{{ item.domain_name | default(omit)}}"
+  loop: "{{ vm }}"
+
+- name: Create a network interface
+  azure_rm_networkinterface:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resourcegroup_name }}"
+    virtual_network: "{{ virtualnetwork_name }}"
+    subnet_name: "{{subnet_name}}"
+    security_group: "{{ item.role }}"
+    public_ip_name: "{{ item.name }}-ip"
+  loop: "{{ vm }}"
+
+- name: Create Virtual Machine
+  azure_rm_virtualmachine:
+    resource_group: "{{ item.resourcegroup_name }}"
+    name: "{{ item.name }}"
+    admin_username: "{{ admin_username }}"
+    admin_password: "{{ admin_password }}"
+    network_interface_names: "{{ item.name }}"
+    ssh_public_keys:
+    - path: "/home/{{ admin_username }}/.ssh/authorized_keys"
+      key_data: "{{ ssh_key_path }}"
+    vm_size: "{{ vm_size }}"
+    tags:
+      site: "{{ item.site | default(None) }}"
+      role: "{{ item.role | default(None)}}"
+    image:
+      offer: "{{ offer }}"
+      publisher: "{{ publisher }}"
+      sku: "{{ sku }}"
+      version: "{{ image_version }}"
+  loop: "{{ vm }}"

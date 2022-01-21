@@ -1,0 +1,30 @@
+- name: Create Azure VM
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    repo_url: "https://github.com/ansible-middleware/wildfly-cluster-demo.git"
+    branch: main
+  tasks:
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ playbook_dir }}/wildfly-cluster-demo"
+        version: "{{ branch }}"
+        single_branch: yes
+        clone: yes
+        update: yes
+
+    - name: Create demo resources on azure.
+      include_role:
+        name: 'azure'
+      vars:
+        ssh_key_path: "{{ ssh_key | default(lookup('env', 'HOME') + '/.ssh/id_rsa.pub')}}"
+        dns_name: "azuredemos.ansiblemiddleware.com" # This is optional
+    
+    - meta: refresh_inventory
+    - pause:
+        minutes: 1
+
+- name: Run wildfly-cluster-demo
+  import_playbook: wildfly-cluster-demo/playbook.yml
