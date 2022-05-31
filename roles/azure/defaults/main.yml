@@ -40,6 +40,12 @@ vm:
   - name: 'site1-eap1'
     site: 'site1'
     role: 'eap'
-    resourcegroup_name: ansible-middileware-eastus-rg
+    resourcegroup_name: eap-cluster
+    resourcegroup_location: eastus
+    domain_name: 'eap'
+  - name: 'site1-eap2'
+    site: 'site1'
+    role: 'eap'
+    resourcegroup_name: eap-cluster
     resourcegroup_location: eastus
     domain_name: 'eap'

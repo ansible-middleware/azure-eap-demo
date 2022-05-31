@@ -29,7 +29,7 @@ rhn_password: '<password>'
 
 2. Execute the main play:
 ```
-ansible-playbook -e @rhn-creds.yml -i cross-dc-rhsso-demo/myazure_rm.yml -i cross-dc-rhsso-demo/group_vars/all.yml -e "ansible_ssh_user=azureuser ansible_ssh_private_key_file='provide_your_ssh_private_key'" create-demo-setup.yml
+ansible-playbook -e @rhn-creds.yml -i inventory/myazure_rm.yml -e "ansible_ssh_user=rheluser ansible_ssh_private_key_file='provide_your_ssh_private_key' hosts_group_name=eap wildfly_version=7.4 override_install_name=jboss-eap" create-demo-setup.yml
 ```
 Note: Replace `provide_your_ssh_private_key` with ssh private key file.
 

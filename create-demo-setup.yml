@@ -20,7 +20,6 @@
         name: 'azure'
       vars:
         ssh_key_path: "{{ ssh_key | default(lookup('env', 'HOME') + '/.ssh/id_rsa.pub')}}"
-        dns_name: "azuredemos.ansiblemiddleware.com" # This is optional
     
     - meta: refresh_inventory
     - pause:
